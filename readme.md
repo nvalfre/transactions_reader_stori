@@ -14,7 +14,7 @@ The Transaction Summary Microservice is a Go-based application that processes a 
 
 ## Prerequisites
 
-- Go (version 1.16 or higher)
+- Go (version 1.20 or higher)
 - Docker (optional)
 
 ## Installation
