@@ -2,8 +2,20 @@ package account_service
 
 import "transactions_reader_stori/domain/dao"
 
-// ProcessFile processes the file and saves the transactions to the database
-func (s *AccountService) SaveAccount(fileContent []byte) error {
+// ProcessFileContent processes the file and saves the transactions to the database
+func (s *AccountService) SaveAccount(acccount *dao.Account) error {
+	err := s.repo.SaveAccount(acccount)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (r *AccountService) UpdateAccountBalance(account *dao.Account) error {
+	err := r.repo.UpdateAccountBalance(account)
+	if err != nil {
+		return err
+	}
 	return nil
 }
 

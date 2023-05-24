@@ -1,7 +1,8 @@
 package services
 
 import (
-	"transactions_reader_stori/repository"
+	"transactions_reader_stori/repository/account_repository"
+	"transactions_reader_stori/repository/transaction_repository"
 	"transactions_reader_stori/services/account_service"
 	"transactions_reader_stori/services/email_service"
 	"transactions_reader_stori/services/file_service"
@@ -17,9 +18,9 @@ type Services struct {
 	EmailService       email_service.EmailServiceI
 }
 
-func InitServices(db *repository.DatabaseRepo) *Services {
-	accountService := account_service.NewAccountService(db)
-	transactionService := transaction_service.NewTransactionService(db, accountService)
+func InitServices(transactionRepository transaction_repository.TransactionRepository, accountDatabaseRepo account_repository.AccountRepository) *Services {
+	accountService := account_service.NewAccountService(accountDatabaseRepo)
+	transactionService := transaction_service.NewTransactionService(transactionRepository, accountService)
 	emailService := email_service.NewEmailServiceDefault()
 
 	fileContentReaderUseCase := file_service_content_reader.NewFileContentReaderUseCase()

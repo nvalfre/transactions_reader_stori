@@ -5,13 +5,18 @@ import (
 	"log"
 	"transactions_reader_stori/controllers"
 	"transactions_reader_stori/repository"
+	"transactions_reader_stori/repository/account_repository"
+	"transactions_reader_stori/repository/transaction_repository"
 	"transactions_reader_stori/services"
 )
 
 func RunApp() {
 	databaseRepo := initDb()
 
-	initServices := services.InitServices(databaseRepo)
+	transactionDatabaseRepo := transaction_repository.NewTransactionDatabaseRepo(databaseRepo)
+	accountDatabaseRepo := account_repository.NewAccountDatabaseRepo(databaseRepo)
+
+	initServices := services.InitServices(transactionDatabaseRepo, accountDatabaseRepo)
 	initControllers := controllers.InitControllers(initServices)
 	router := initRoutes(initControllers)
 

@@ -26,7 +26,7 @@ func (fs *FileSummaryGeneratorUseCase) GenerateSummary(c *gin.Context, fileConte
 	accountName := c.Query("AccountName")
 
 	go func(content []byte) {
-		err := fs.transactionService.ProcessFile(content, accountID, accountName)
+		err := fs.transactionService.ProcessFileContent(content, accountID, accountName)
 		if err != nil {
 			errorCh <- err
 		} else {

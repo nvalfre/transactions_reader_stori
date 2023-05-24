@@ -3,22 +3,30 @@ package transaction_service
 import (
 	"database/sql"
 	"errors"
+	"log"
 	"strings"
 	"transactions_reader_stori/domain"
 	"transactions_reader_stori/domain/dao"
+	"transactions_reader_stori/services/builders"
 	"transactions_reader_stori/utils"
 	"transactions_reader_stori/validators"
 )
 
-// ProcessFile processes the file and saves the transactions to the database
-func (s *TransactionService) ProcessFile(fileContent []byte, accountId string, accountName string) error {
+// ProcessFileContent processes the file and saves the transactions to the database
+func (s *TransactionService) ProcessFileContent(fileContent []byte, accountId string, accountName string) error {
 	lines := strings.Split(string(fileContent), "\n")
 
 	account, err := s.accountService.GetAccount(accountId)
-	if err != nil {
-		if err != sql.ErrNoRows {
+	if err != nil && err != sql.ErrNoRows {
+		return err
+	}
+
+	if account.ID == 0 {
+		newAccount := &dao.Account{Balance: 0, Name: accountName}
+		if err := s.accountService.SaveAccount(newAccount); err != nil {
 			return err
 		}
+		account = newAccount
 	}
 
 	for _, line := range lines[1:] {
@@ -30,32 +38,48 @@ func (s *TransactionService) ProcessFile(fileContent []byte, accountId string, a
 		date := strings.TrimSpace(fields[1])
 		amount := strings.TrimSpace(fields[2])
 
-		var transaction dao.Transaction
-		transaction.Date = date
-		transaction.Amount = utils.ParseAmount(amount)
-		transaction.IsCredit = validators.IsCredit(amount)
+		transaction := dao.Transaction{
+			Date:      date,
+			Amount:    utils.ParseAmount(amount),
+			IsCredit:  validators.IsCredit(amount),
+			AccountID: account.ID,
+		}
 
-		if account.ID == 0 {
-			newAccount := &dao.Account{Balance: transaction.Amount, Name: accountName}
-			if err := s.repo.SaveAccount(newAccount); err != nil {
+		existingTransaction, err := s.repo.GetTransactionByDateAndAccountID(date, account.ID)
+		if err != nil {
+			return err
+		}
+
+		if existingTransaction != nil {
+			log.Printf("Transaction already exists for date: %s and account ID: %s. Performing update.", date, account.ID)
+
+			transaction.ID = existingTransaction.ID
+			if err := s.repo.UpdateTransaction(&transaction); err != nil {
 				return err
 			}
-			transaction.AccountID = newAccount.ID
-			account = newAccount
-		} else {
-			transaction.AccountID = account.ID
 			if transaction.IsCredit {
 				account.Balance += transaction.Amount
 			} else {
 				account.Balance -= transaction.Amount
 			}
-			if err := s.repo.SaveAccount(account); err != nil {
+
+			if err := s.accountService.UpdateAccountBalance(account); err != nil {
 				return err
 			}
-		}
+		} else {
+			if transaction.IsCredit {
+				account.Balance += transaction.Amount
+			} else {
+				account.Balance -= transaction.Amount
+			}
 
-		if err := s.repo.SaveTransaction(&transaction); err != nil {
-			return err
+			if err := s.accountService.SaveAccount(account); err != nil {
+				return err
+			}
+
+			if err := s.repo.SaveTransaction(&transaction); err != nil {
+				return err
+			}
 		}
 	}
 
@@ -74,45 +98,34 @@ func (s *TransactionService) GenerateSummary(accountId string) (*domain.SummaryV
 		return nil, errors.New("invalid_account")
 	}
 
-	var totalBalance float64
-	if err := s.repo.Db.QueryRow("SELECT SUM(amount) FROM TRANSACTIONS").Scan(&totalBalance); err != nil {
-		return nil, err
-	}
-
-	rows, err := s.repo.Db.Query("SELECT MONTH(date) AS month, COUNT(*) AS num_of_trans FROM TRANSACTIONS GROUP BY month ORDER BY month")
+	transactionMetadata, err := s.getTransactionMetadata(err)
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
 
-	transactionSummary := make(map[string]int)
-	for rows.Next() {
-		var month string
-		var numOfTrans int
-		err := rows.Scan(&month, &numOfTrans)
-		if err != nil {
-			return nil, err
-		}
-		transactionSummary[month] = numOfTrans
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-
-	var averageCredit, averageDebit float64
-	if err := s.repo.Db.QueryRow("SELECT AVG(amount) FROM TRANSACTIONS WHERE is_credit = ?", true).Scan(&averageCredit); err != nil {
-		return nil, err
-	}
-	if err := s.repo.Db.QueryRow("SELECT AVG(amount) FROM TRANSACTIONS WHERE is_credit = ?", false).Scan(&averageDebit); err != nil {
-		return nil, err
-	}
-
-	summary := &domain.SummaryVO{
-		TotalBalance:       totalBalance,
-		TransactionSummary: transactionSummary,
-		AverageCredit:      averageCredit,
-		AverageDebit:       averageDebit,
-	}
+	summary := builders.BuildSummary(transactionMetadata)
 
 	return summary, nil
+}
+func (s *TransactionService) getTransactionMetadata(err error) (*domain.TransactionMetadata, error) {
+	totalBalance, err := s.repo.GetTotalBalance()
+	if err != nil {
+		return nil, err
+	}
+
+	transactionSummary, err := s.repo.GetTransactionSummary()
+	if err != nil {
+		return nil, err
+	}
+
+	averageCredit, err := s.repo.GetAverageCredit()
+	if err != nil {
+		return nil, err
+	}
+
+	averageDebit, err := s.repo.GetAverageDebit()
+	if err != nil {
+		return nil, err
+	}
+	return builders.BuildTransactionMetadata(totalBalance, transactionSummary, averageCredit, averageDebit), nil
 }
