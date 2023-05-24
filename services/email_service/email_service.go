@@ -8,8 +8,8 @@ import (
 )
 
 // SendSummaryEmail sends the summary information as an email
-func (s *EmailService) SendSummaryEmail(summary *domain.Summary, recipient string) error {
-	subject := "Summary Report"
+func (s *EmailService) SendSummaryEmail(summary *domain.SummaryVO, recipient string) error {
+	subject := "SummaryVO Report"
 	body := fmt.Sprintf(`Total balance: %.2f
 Number of transactions in July: %d
 Number of transactions in August: %d

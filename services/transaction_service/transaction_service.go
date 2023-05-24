@@ -1,7 +1,8 @@
 package transaction_service
 
 import (
-	"gorm.io/gorm"
+	"database/sql"
+	"errors"
 	"strings"
 	"transactions_reader_stori/domain"
 	"transactions_reader_stori/domain/dao"
@@ -10,12 +11,12 @@ import (
 )
 
 // ProcessFile processes the file and saves the transactions to the database
-func (s *TransactionService) ProcessFile(fileContent []byte) error {
+func (s *TransactionService) ProcessFile(fileContent []byte, accountId string, accountName string) error {
 	lines := strings.Split(string(fileContent), "\n")
 
-	var account dao.Account
-	if err := s.repo.Db.First(&account).Error; err != nil {
-		if err != gorm.ErrRecordNotFound {
+	account, err := s.accountService.GetAccount(accountId)
+	if err != nil {
+		if err != sql.ErrNoRows {
 			return err
 		}
 	}
@@ -35,8 +36,8 @@ func (s *TransactionService) ProcessFile(fileContent []byte) error {
 		transaction.IsCredit = validators.IsCredit(amount)
 
 		if account.ID == 0 {
-			newAccount := dao.Account{Balance: transaction.Amount}
-			if err := s.repo.SaveAccount(&newAccount); err != nil {
+			newAccount := &dao.Account{Balance: transaction.Amount, Name: accountName}
+			if err := s.repo.SaveAccount(newAccount); err != nil {
 				return err
 			}
 			transaction.AccountID = newAccount.ID
@@ -48,7 +49,7 @@ func (s *TransactionService) ProcessFile(fileContent []byte) error {
 			} else {
 				account.Balance -= transaction.Amount
 			}
-			if err := s.repo.SaveAccount(&account); err != nil {
+			if err := s.repo.SaveAccount(account); err != nil {
 				return err
 			}
 		}
@@ -62,49 +63,55 @@ func (s *TransactionService) ProcessFile(fileContent []byte) error {
 }
 
 // GenerateSummary generates the summary information
-func (s *TransactionService) GenerateSummary() (*domain.Summary, error) {
-	var account dao.Account
-	if err := s.repo.Db.First(&account).Error; err != nil {
-		return nil, err
+func (s *TransactionService) GenerateSummary(accountId string) (*domain.SummaryVO, error) {
+	account, err := s.accountService.GetAccount(accountId)
+	if err != nil {
+		if err != sql.ErrNoRows {
+			return nil, err
+		}
+	}
+	if account.ID == 0 {
+		return nil, errors.New("invalid_account")
 	}
 
 	var totalBalance float64
-	if err := s.repo.Db.Model(&dao.Transaction{}).Select("SUM(amount)").Scan(&totalBalance).Error; err != nil {
+	if err := s.repo.Db.QueryRow("SELECT SUM(amount) FROM TRANSACTIONS").Scan(&totalBalance); err != nil {
 		return nil, err
 	}
 
-	var transactionSummary []struct {
-		Month      string
-		NumOfTrans int64
+	rows, err := s.repo.Db.Query("SELECT MONTH(date) AS month, COUNT(*) AS num_of_trans FROM TRANSACTIONS GROUP BY month ORDER BY month")
+	if err != nil {
+		return nil, err
 	}
-	if err := s.repo.Db.Select("strftime('%m', date) AS month, COUNT(*) AS num_of_trans").
-		Group("month").
-		Order("month").
-		Find(&transactionSummary).Error; err != nil {
+	defer rows.Close()
+
+	transactionSummary := make(map[string]int)
+	for rows.Next() {
+		var month string
+		var numOfTrans int
+		err := rows.Scan(&month, &numOfTrans)
+		if err != nil {
+			return nil, err
+		}
+		transactionSummary[month] = numOfTrans
+	}
+	if err := rows.Err(); err != nil {
 		return nil, err
 	}
 
 	var averageCredit, averageDebit float64
-	if err := s.repo.Db.Model(&dao.Transaction{}).Select("AVG(amount)").
-		Where("is_credit = ?", true).
-		Scan(&averageCredit).Error; err != nil {
+	if err := s.repo.Db.QueryRow("SELECT AVG(amount) FROM TRANSACTIONS WHERE is_credit = ?", true).Scan(&averageCredit); err != nil {
 		return nil, err
 	}
-	if err := s.repo.Db.Model(&dao.Transaction{}).Select("AVG(amount)").
-		Where("is_credit = ?", false).
-		Scan(&averageDebit).Error; err != nil {
+	if err := s.repo.Db.QueryRow("SELECT AVG(amount) FROM TRANSACTIONS WHERE is_credit = ?", false).Scan(&averageDebit); err != nil {
 		return nil, err
 	}
 
-	summary := &domain.Summary{
+	summary := &domain.SummaryVO{
 		TotalBalance:       totalBalance,
-		TransactionSummary: make(map[string]int),
+		TransactionSummary: transactionSummary,
 		AverageCredit:      averageCredit,
 		AverageDebit:       averageDebit,
-	}
-
-	for _, t := range transactionSummary {
-		summary.TransactionSummary[t.Month] = int(t.NumOfTrans)
 	}
 
 	return summary, nil

@@ -2,37 +2,50 @@ package repository
 
 import (
 	"database/sql"
+	_ "github.com/go-sql-driver/mysql"
 	"log"
+	_ "modernc.org/sqlite"
 )
 
-// DatabaseRepo handles interactions with the database
-type DatabaseRepo struct {
-	Db *sql.DB
+// NewDatabaseRepo creates a new instance of DatabaseRepo
+func NewDatabaseRepo() *DatabaseRepo {
+	return openSqlite()
+	//dsn := "user:password@/dbname"
+	//db, err := sql.Open("mysql", dsn) //TODO implement rds.
+	//if err != nil {
+	//	log.Println(err)
+	//	return openSqlite()
+	//}
+	//
+	//err = db.Ping()
+	//if err != nil {
+	//	log.Println(err)
+	//	return openSqlite()
+	//}
+	//
+	//err = executeMockMigrationDDL(db)
+	//if err != nil {
+	//	log.Fatal(err)
+	//}
+	//
+	//return &DatabaseRepo{
+	//	Db: db,
+	//}
 }
 
-// NewDatabaseRepo creates a new instance of DatabaseRepo
-func NewDatabaseRepo(db *sql.DB) *DatabaseRepo {
-	db, err := sql.Open("sqlite3", "transactions.db")
+func executeMockMigrationDDL(db *sql.DB) error {
+	_, err := db.Exec(queryDDL)
+	return err
+}
+
+func openSqlite() *DatabaseRepo {
+	db, err := sql.Open("sqlite", "transactions.db")
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer db.Close()
-	_, err = db.Exec(`
-	CREATE TABLE IF NOT EXISTS accounts (
-		id INTEGER PRIMARY KEY AUTOINCREMENT,
-		name TEXT,
-		email TEXT
-	);
+	err = executeMockMigrationDDL(db)
 
-	CREATE TABLE IF NOT EXISTS transactions (
-		id INTEGER PRIMARY KEY AUTOINCREMENT,
-		account_id INTEGER,
-		date TEXT,
-		amount REAL,
-		is_credit INTEGER,
-		FOREIGN KEY(account_id) REFERENCES accounts(id)
-	);
-`)
 	if err != nil {
 		log.Fatal(err)
 	}
