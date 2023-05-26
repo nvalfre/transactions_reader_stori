@@ -1,4 +1,4 @@
-package repository
+package init_repositories
 
 const queryDDL = `
 	CREATE TABLE IF NOT EXISTS ACCOUNTS (

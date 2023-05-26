@@ -1,4 +1,4 @@
-package services
+package init_services
 
 import (
 	"transactions_reader_stori/repository/account_repository"
@@ -18,7 +18,7 @@ type Services struct {
 	EmailService       email_service.EmailServiceI
 }
 
-func InitServices(transactionRepository transaction_repository.TransactionRepository, accountDatabaseRepo account_repository.AccountRepository) *Services {
+func Init(transactionRepository transaction_repository.TransactionRepository, accountDatabaseRepo account_repository.AccountRepository) *Services {
 	accountService := account_service.NewAccountService(accountDatabaseRepo)
 	transactionService := transaction_service.NewTransactionService(transactionRepository, accountService)
 	emailService := email_service.NewEmailServiceDefault()
