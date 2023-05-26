@@ -2,9 +2,9 @@ package initializer
 
 import (
 	"github.com/gin-gonic/gin"
+	"transactions_reader_stori/app_config/app"
 	"transactions_reader_stori/controllers/file_controller"
 	"transactions_reader_stori/controllers/init_controllers"
-	"transactions_reader_stori/main/app"
 	"transactions_reader_stori/repository/factories/account_repository_factory"
 	"transactions_reader_stori/repository/factories/transaction_repository_factory"
 	"transactions_reader_stori/repository/init_repositories"
