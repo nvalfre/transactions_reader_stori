@@ -1,4 +1,3 @@
-```markdown
 # Transaction Summary Microservice
 
 The Transaction Summary Microservice is a Go-based application that processes a file containing debit and credit transactions on an account and sends a summary of the transactions via email. It provides an API endpoint to upload the transaction file and generate the summary.
