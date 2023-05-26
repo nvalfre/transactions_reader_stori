@@ -15,7 +15,7 @@ const (
 )
 
 // NewEmailService creates a new instance of EmailService
-func NewEmailServiceDefault() *EmailService {
+func NewEmailServiceDefault() EmailServiceI {
 	return NewEmailService(
 		DefaultSMTPHost,
 		DefaultSMTPPort,
@@ -27,7 +27,7 @@ func NewEmailServiceDefault() *EmailService {
 }
 
 // NewEmailService creates a new instance of EmailService
-func NewEmailService(smtpHost string, smtpPort int, smtpUsername, smtpPassword, senderName, senderEmail string) *EmailService {
+func NewEmailService(smtpHost string, smtpPort int, smtpUsername, smtpPassword, senderName, senderEmail string) EmailServiceI {
 	return &EmailService{
 		smtpHost:     smtpHost,
 		smtpPort:     smtpPort,

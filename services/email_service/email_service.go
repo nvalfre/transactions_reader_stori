@@ -7,14 +7,16 @@ import (
 	"transactions_reader_stori/domain"
 )
 
+const subject = "SummaryVO Report"
+const emailBody = `Total balance: %.2f
+				Number of transactions in July: %d
+				Number of transactions in August: %d
+				Average credit amount: %.2f
+				Average debit amount: %.2f`
+
 // SendSummaryEmail sends the summary information as an email
-func (s *EmailService) SendSummaryEmail(summary *domain.Summary, recipient string) error {
-	subject := "Summary Report"
-	body := fmt.Sprintf(`Total balance: %.2f
-Number of transactions in July: %d
-Number of transactions in August: %d
-Average credit amount: %.2f
-Average debit amount: %.2f`, summary.TotalBalance, summary.TransactionSummary["07"], summary.TransactionSummary["08"], summary.AverageCredit, summary.AverageDebit)
+func (s *EmailService) SendSummaryEmail(summary *domain.SummaryVO, recipient string) error {
+	body := fmt.Sprintf(emailBody, summary.TotalBalance, summary.TransactionSummary[0].NumOfTrans, summary.TransactionSummary[1].NumOfTrans, summary.AverageCredit, summary.AverageDebit)
 
 	mailer := gomail.NewMessage()
 	mailer.SetHeader("From", fmt.Sprintf("%s <%s>", s.senderName, s.senderEmail))

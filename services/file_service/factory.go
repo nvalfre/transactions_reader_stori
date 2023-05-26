@@ -1,14 +1,16 @@
 package file_service
 
 import (
-	"transactions_reader_stori/services/email_service"
-	"transactions_reader_stori/services/transaction_service"
+	"transactions_reader_stori/services/file_service/file_service_content_reader"
+	"transactions_reader_stori/services/file_service/file_service_summary_generator"
 )
 
 // NewFileService creates a new instance of FileService
-func NewFileService(transactionService *transaction_service.TransactionService, emailService *email_service.EmailService) *FileService {
+func NewFileService(
+	fileContentReaderUseCase file_service_content_reader.FileContentReaderUseCaseI,
+	fileSummaryGeneratorUseCase file_service_summary_generator.FileSummaryGeneratorUseCaseI) FileServiceI {
 	return &FileService{
-		transactionService: transactionService,
-		emailService:       emailService,
+		fileContentReaderUseCase:    fileContentReaderUseCase,
+		fileSummaryGeneratorUseCase: fileSummaryGeneratorUseCase,
 	}
 }

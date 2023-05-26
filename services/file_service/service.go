@@ -1,12 +1,12 @@
 package file_service
 
 import (
-	"transactions_reader_stori/services/email_service"
-	"transactions_reader_stori/services/transaction_service"
+	"transactions_reader_stori/services/file_service/file_service_content_reader"
+	"transactions_reader_stori/services/file_service/file_service_summary_generator"
 )
 
 // FileService handles file processing HTTP endpoint
 type FileService struct {
-	transactionService *transaction_service.TransactionService
-	emailService       *email_service.EmailService
+	fileContentReaderUseCase    file_service_content_reader.FileContentReaderUseCaseI
+	fileSummaryGeneratorUseCase file_service_summary_generator.FileSummaryGeneratorUseCaseI
 }
