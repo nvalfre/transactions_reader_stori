@@ -1,5 +1,3 @@
-Certainly! Here's an example of a concise and detailed README.md file for the microservice:
-
 ```markdown
 # Transaction Summary Microservice
 
@@ -15,7 +13,6 @@ The Transaction Summary Microservice is a Go-based application that processes a 
 ## Prerequisites
 
 - Go (version 1.20 or higher)
-- Docker (optional)
 
 ## Installation
 
