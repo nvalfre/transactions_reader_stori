@@ -1,7 +1,7 @@
 package transaction_service
 
 import (
-	"transactions_reader_stori/repository/transaction_repository"
+	"transactions_reader_stori/repository/commands/transaction_repository"
 	"transactions_reader_stori/services/account_service"
 )
 
