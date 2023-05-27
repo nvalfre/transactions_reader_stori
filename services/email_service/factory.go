@@ -14,9 +14,18 @@ const (
 	DefaultSenderEmail = "noreply@example.com"
 )
 
+type EmailServiceFactoryI interface {
+	NewEmailServiceDefault() EmailServiceI
+	newEmailService(smtpHost string, smtpPort int, smtpUsername, smtpPassword, senderName, senderEmail string) EmailServiceI
+}
+
+type EmailServiceFactory struct{}
+
+// NewAccountService creates a new instance of AccountService
+
 // NewEmailService creates a new instance of EmailService
-func NewEmailServiceDefault() EmailServiceI {
-	return NewEmailService(
+func (factory *EmailServiceFactory) NewEmailServiceDefault() EmailServiceI {
+	return factory.newEmailService(
 		DefaultSMTPHost,
 		DefaultSMTPPort,
 		DefaultSMTPUsername,
@@ -27,7 +36,7 @@ func NewEmailServiceDefault() EmailServiceI {
 }
 
 // NewEmailService creates a new instance of EmailService
-func NewEmailService(smtpHost string, smtpPort int, smtpUsername, smtpPassword, senderName, senderEmail string) EmailServiceI {
+func (factory *EmailServiceFactory) newEmailService(smtpHost string, smtpPort int, smtpUsername, smtpPassword, senderName, senderEmail string) EmailServiceI {
 	return &EmailService{
 		smtpHost:     smtpHost,
 		smtpPort:     smtpPort,

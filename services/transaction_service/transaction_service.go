@@ -51,7 +51,7 @@ func (s *TransactionService) ProcessFileContent(fileContent []byte, accountId st
 		}
 
 		if existingTransaction != nil {
-			log.Printf("Transaction already exists for date: %s and account ID: %s. Performing update.", date, account.ID)
+			log.Printf("Transaction already exists for date: %s and account ID: %v. Performing update.", date, account.ID)
 
 			transaction.ID = existingTransaction.ID
 			if err := s.repo.UpdateTransaction(&transaction); err != nil {

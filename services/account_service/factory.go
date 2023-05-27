@@ -1,11 +1,17 @@
 package account_service
 
 import (
-	"transactions_reader_stori/repository/account_repository"
+	"transactions_reader_stori/repository/commands/account_repository"
 )
 
+type AccountServiceFactoryI interface {
+	NewAccountService(repo account_repository.AccountRepository) AccountServiceI
+}
+
+type AccountServiceFactory struct{}
+
 // NewAccountService creates a new instance of AccountService
-func NewAccountService(repo account_repository.AccountRepository) AccountServiceI {
+func (factory *AccountServiceFactory) NewAccountService(repo account_repository.AccountRepository) AccountServiceI {
 	return &AccountService{
 		repo: repo,
 	}

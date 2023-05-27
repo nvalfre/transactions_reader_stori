@@ -1,7 +1,10 @@
 package main
 
-import "transactions_reader_stori/app"
+import (
+	"transactions_reader_stori/app_config/initializer"
+)
 
 func main() {
-	app.RunApp()
+	appComponentsInitializer := initializer.AppComponentsInitializer{}
+	appComponentsInitializer.Init()
 }
