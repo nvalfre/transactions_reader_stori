@@ -1,6 +1,7 @@
 package transaction_repository
 
 import (
+	"time"
 	"transactions_reader_stori/domain"
 	"transactions_reader_stori/domain/dao"
 )
@@ -25,8 +26,9 @@ func (mockTransactionRepository MockTransactionRepository) GetTotalBalance() (fl
 }
 func (mockTransactionRepository MockTransactionRepository) GetTransactionSummary() ([]domain.TransactionSummary, error) {
 	return []domain.TransactionSummary{{
-		Month:      "Apr",
-		NumOfTrans: 1,
+		Month:  time.Now(),
+		Amount: 1,
+		ID:     1,
 	}}, nil
 }
 func (mockTransactionRepository MockTransactionRepository) GetAverageCredit() (float64, error) {

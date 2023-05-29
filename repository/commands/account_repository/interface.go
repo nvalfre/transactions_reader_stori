@@ -7,5 +7,5 @@ import (
 type AccountRepository interface {
 	SaveAccount(account *dao.Account) error
 	UpdateAccountBalance(account *dao.Account) error
-	GetAccountById(id string) (*dao.Account, error)
+	GetAccountById(id int) (*dao.Account, error)
 }

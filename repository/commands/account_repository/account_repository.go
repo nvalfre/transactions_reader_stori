@@ -8,11 +8,11 @@ import (
 // SaveAccount saves an account to the database
 func (r *AccountDatabaseRepo) SaveAccount(account *dao.Account) error {
 	// Insert the account into the database
-	query := "INSERT INTO ACCOUNTS (name, email, balance) VALUES (?, ?)"
+	query := "INSERT INTO ACCOUNTS (name, email, balance) VALUES (?, ?, ?)"
 
 	result, err := r.Db.Exec(query, account.Name, account.Email, account.Balance)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 		return err
 	}
 
@@ -27,19 +27,21 @@ func (r *AccountDatabaseRepo) UpdateAccountBalance(account *dao.Account) error {
 
 	_, err := r.Db.Exec(query, account.Balance, account.ID)
 	if err != nil {
+		log.Println(err)
 		return err
 	}
 	return nil
 }
 
 // GetAccountById retrieves an account from the database
-func (r *AccountDatabaseRepo) GetAccountById(id string) (*dao.Account, error) {
+func (r *AccountDatabaseRepo) GetAccountById(id int) (*dao.Account, error) {
 	account := &dao.Account{}
 	query := "SELECT id, name, balance FROM ACCOUNTS WHERE id = ? LIMIT 1"
 
 	row := r.Db.QueryRow(query, id)
 	err := row.Scan(&account.ID, &account.Name, &account.Balance)
 	if err != nil {
+		log.Println(err)
 		return nil, err
 	}
 

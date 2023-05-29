@@ -1,32 +1,37 @@
 package file_service_content_reader
 
 import (
-	"github.com/gin-gonic/gin"
 	"log"
+	"os"
 )
 
 type FileContentReaderUseCase struct {
 }
 
-func (fs *FileContentReaderUseCase) GetFileContent(c *gin.Context) ([]byte, error) {
-	file, err := c.FormFile("file")
+func (fs *FileContentReaderUseCase) GetFileContent() ([]byte, error) {
+	filePath := "balance.csv"
+
+	file, err := os.Open(filePath)
+	if err != nil {
+		log.Println("Error occurred:", err)
+		return nil, err
+	}
+	defer file.Close()
+
+	fileInfo, err := file.Stat()
 	if err != nil {
 		log.Println("Error occurred:", err)
 		return nil, err
 	}
 
-	src, err := file.Open()
-	if err != nil {
-		log.Println("Error occurred:", err)
-		return nil, err
-	}
-	defer src.Close()
+	fileSize := fileInfo.Size()
+	fileContent := make([]byte, fileSize)
 
-	fileContent := make([]byte, file.Size)
-	_, err = src.Read(fileContent)
+	_, err = file.Read(fileContent)
 	if err != nil {
 		log.Println("Error occurred:", err)
 		return nil, err
 	}
+
 	return fileContent, nil
 }
