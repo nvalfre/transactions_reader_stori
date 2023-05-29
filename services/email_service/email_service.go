@@ -16,7 +16,7 @@ const emailBody = `Total balance: %.2f
 
 // SendSummaryEmail sends the summary information as an email
 func (s *EmailService) SendSummaryEmail(summary *domain.SummaryVO, recipient string) error {
-	body := fmt.Sprintf(emailBody, summary.TotalBalance, summary.TransactionSummary[0].NumOfTrans, summary.TransactionSummary[1].NumOfTrans, summary.AverageCredit, summary.AverageDebit)
+	body := fmt.Sprintf(emailBody, summary.TotalBalance, summary.TransactionSummary[0].Amount, summary.TransactionSummary[1].Amount, summary.AverageCredit, summary.AverageDebit)
 
 	mailer := gomail.NewMessage()
 	mailer.SetHeader("From", fmt.Sprintf("%s <%s>", s.senderName, s.senderEmail))

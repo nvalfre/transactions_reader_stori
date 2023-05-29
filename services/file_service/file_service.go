@@ -8,7 +8,7 @@ import (
 
 // ProcessFile processes the uploaded file
 func (fs *FileService) ProcessFile(c *gin.Context) (*domain.Response, error) {
-	fileContent, err := fs.fileContentReaderUseCase.GetFileContent(c)
+	fileContent, err := fs.fileContentReaderUseCase.GetFileContent()
 	if err != nil {
 		return &domain.Response{
 			Status: http.StatusBadRequest,

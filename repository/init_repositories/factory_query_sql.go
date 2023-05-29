@@ -1,9 +1,13 @@
 package init_repositories
 
 const queryDDL = `
+	DROP TABLE TRANSACTIONS;
+	DROP TABLE ACCOUNTS;
+	
 	CREATE TABLE IF NOT EXISTS ACCOUNTS (
 		id INTEGER PRIMARY KEY,
 		name TEXT,
+		email TEXT,
 		balance FLOAT
 	);
 

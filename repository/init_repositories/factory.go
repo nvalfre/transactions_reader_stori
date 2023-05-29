@@ -8,8 +8,8 @@ import (
 )
 
 // NewDatabaseRepo creates a new instance of DatabaseRepo
-func NewDatabaseRepo() *DatabaseRepo {
-	return openSqlite()
+func NewDatabaseRepo(db *sql.DB) *DatabaseRepo {
+	return openSqlite(db)
 	//dsn := "user:password@/dbname"
 	//db, err := sql.Open("mysql", dsn) //TODO implement rds.
 	//if err != nil {
@@ -38,13 +38,8 @@ func executeMockMigrationDDL(db *sql.DB) error {
 	return err
 }
 
-func openSqlite() *DatabaseRepo {
-	db, err := sql.Open("sqlite", "transactions.db")
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer db.Close()
-	err = executeMockMigrationDDL(db)
+func openSqlite(db *sql.DB) *DatabaseRepo {
+	err := executeMockMigrationDDL(db)
 
 	if err != nil {
 		log.Fatal(err)

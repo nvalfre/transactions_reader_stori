@@ -1,7 +1,10 @@
 package domain
 
+import "time"
+
 // TransactionSummary represents the transaction specific summary
 type TransactionSummary struct {
-	Month      string
-	NumOfTrans int
+	ID     int
+	Month  time.Time
+	Amount float64
 }

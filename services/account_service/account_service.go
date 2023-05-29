@@ -20,7 +20,7 @@ func (r *AccountService) UpdateAccountBalance(account *dao.Account) error {
 }
 
 // GetAccount generates the summary information
-func (s *AccountService) GetAccount(id string) (*dao.Account, error) {
+func (s *AccountService) GetAccount(id int) (*dao.Account, error) {
 	account, err := s.repo.GetAccountById(id)
 	if err != nil {
 		return nil, err
