@@ -10,7 +10,7 @@ type TransactionRepository interface {
 	UpdateTransaction(transaction *dao.Transaction) error
 	GetTransactionByDateAndAccountID(date string, accountID uint) (*dao.Transaction, error)
 	GetTotalBalance() (float64, error)
-	GetTransactionSummary() ([]domain.TransactionSummary, error)
+	GetTransactionSummary(accountID string) ([]domain.TransactionSummary, error)
 	GetAverageCredit() (float64, error)
 	GetAverageDebit() (float64, error)
 }

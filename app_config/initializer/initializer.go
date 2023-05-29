@@ -1,6 +1,7 @@
 package initializer
 
 import (
+	"database/sql"
 	"github.com/gin-gonic/gin"
 	"transactions_reader_stori/app_config/app"
 	"transactions_reader_stori/controllers/file_controller"
@@ -16,8 +17,8 @@ import (
 )
 
 type appComponentsInitializerI interface {
-	Init()
-	initDatabaseRepoCommands() *init_repositories.DatabaseRepoCommands
+	Init(db *sql.DB)
+	initDatabaseRepoCommands(db *sql.DB) *init_repositories.DatabaseRepoCommands
 	initControllerFactories(services *init_services.Services) file_controller.FileControllerFactoryI
 	initServicesFactories() (*account_service.AccountServiceFactory, *transaction_service.TransactionServiceFactory, *file_service.FileServiceFactory, *email_service.EmailServiceFactory)
 	initRoutes(controllers *init_controllers.Controllers) *gin.Engine
@@ -26,8 +27,8 @@ type appComponentsInitializerI interface {
 type AppComponentsInitializer struct {
 }
 
-func (initializer AppComponentsInitializer) Init() {
-	databaseRepoCommands := initializer.initDatabaseRepoCommands()
+func (initializer AppComponentsInitializer) Init(db *sql.DB) {
+	databaseRepoCommands := initializer.initDatabaseRepoCommands(db)
 
 	accountServiceFactory, transactionServiceFactory, fileServiceFactory, emailServiceFactory := initializer.initServicesFactories()
 
@@ -47,8 +48,8 @@ func (initializer AppComponentsInitializer) Init() {
 	app.NewApp(routes).Run()
 }
 
-func (initializer AppComponentsInitializer) initDatabaseRepoCommands() *init_repositories.DatabaseRepoCommands {
-	repo := init_repositories.NewDatabaseRepo()
+func (initializer AppComponentsInitializer) initDatabaseRepoCommands(db *sql.DB) *init_repositories.DatabaseRepoCommands {
+	repo := init_repositories.NewDatabaseRepo(db)
 
 	transactionDatabaseRepo := transaction_repository_factory.NewTransactionDatabaseRepo(repo)
 	accountDatabaseRepo := account_repository_factory.NewAccountDatabaseRepo(repo)

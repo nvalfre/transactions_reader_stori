@@ -3,6 +3,7 @@ package file_service_summary_generator
 import (
 	"github.com/gin-gonic/gin"
 	"log"
+	"strconv"
 	"transactions_reader_stori/domain"
 	"transactions_reader_stori/services/email_service"
 	"transactions_reader_stori/services/transaction_service"
@@ -22,11 +23,12 @@ func (fs *FileSummaryGeneratorUseCase) GenerateSummary(c *gin.Context, fileConte
 	fileProcessingDoneCh := make(chan bool)
 	summaryGenerationDoneCh := make(chan bool)
 
-	accountID := c.Query("AccountId")
-	accountName := c.Query("AccountName")
+	accountID := parseIntParam(c.Query("account_id"))
+	accountName := c.Query("name")
+	accountEmail := c.Query("email")
 
 	go func(content []byte) {
-		err := fs.transactionService.ProcessFileContent(content, accountID, accountName)
+		err := fs.transactionService.ProcessFileContent(content, accountID, accountName, accountEmail)
 		if err != nil {
 			errorCh <- err
 		} else {
@@ -54,12 +56,12 @@ func (fs *FileSummaryGeneratorUseCase) GenerateSummary(c *gin.Context, fileConte
 	var summary *domain.SummaryVO
 	select {
 	case summary = <-summaryCh:
-		err := fs.emailService.SendSummaryEmail(summary, "testmail_stori_nv@gmail.com")
-		if err != nil {
-			log.Println("Failed to send summary email:", err)
-			errorCh <- err
-			return nil, err
-		}
+		//err := fs.emailService.SendSummaryEmail(summary, "testmail_stori_nv@gmail.com")
+		//if err != nil {
+		//	log.Println("Failed to send summary email:", err)
+		//	errorCh <- err
+		//	return nil, err
+		//}
 	case err := <-errorCh:
 		log.Println("Error occurred on summary send:", err)
 		return nil, err
@@ -68,4 +70,12 @@ func (fs *FileSummaryGeneratorUseCase) GenerateSummary(c *gin.Context, fileConte
 	<-summaryGenerationDoneCh
 
 	return summary, nil
+}
+
+func parseIntParam(string string) int {
+	i, err := strconv.ParseInt(string, 10, 0)
+	if err != nil {
+		log.Fatal("Failed to read account id:", err)
+	}
+	return int(i)
 }
