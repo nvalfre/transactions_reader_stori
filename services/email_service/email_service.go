@@ -9,8 +9,8 @@ import (
 
 const subject = "SummaryVO Report"
 const emailBody = `Total balance: %.2f
-				Number of transactions in July: %d
-				Number of transactions in August: %d
+				Number of transactions in July: %f
+				Number of transactions in August: %f
 				Average credit amount: %.2f
 				Average debit amount: %.2f`
 
