@@ -50,7 +50,7 @@ The Transaction Summary Microservice is a Go-based application that processes a 
 1. Start the microservice:
 
    ```bash
-   ./transaction-summary-microservice
+   ./transactions-summary
    ```
 
 2. Upload a transaction file using the API endpoint:
@@ -72,13 +72,13 @@ The microservice can be deployed using various methods such as containerization 
 1. Build the Docker image:
 
    ```bash
-   docker build -t transaction-summary-microservice .
+   docker build -t transactions_summary .
    ```
 
 2. Run the Docker container:
 
    ```bash
-   docker run -p 8080:8080 -e SMTP_HOST=<host> -e SMTP_PORT=<port> -e SMTP_USERNAME=<username> -e SMTP_PASSWORD=<password> -e SENDER_NAME=<sender-name> -e SENDER_EMAIL=<sender-email> transaction-summary-microservice
+   docker run -p 8080:8080 -e SMTP_HOST=<host> -e SMTP_PORT=<port> -e SMTP_USERNAME=<username> -e SMTP_PASSWORD=<password> -e SENDER_NAME=<sender-name> -e SENDER_EMAIL=<sender-email> transactions_summary
    ```
 
    Replace `<host>`, `<port>`, `<username>`, `<password>`, `<sender-name>`, and `<sender-email>` with the actual values.
