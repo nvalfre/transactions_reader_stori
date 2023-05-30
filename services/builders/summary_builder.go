@@ -6,6 +6,7 @@ func BuildSummary(transactionMetadata *domain.TransactionMetadata) *domain.Summa
 	return &domain.SummaryVO{
 		TotalBalance:       transactionMetadata.TotalBalance,
 		TransactionSummary: transactionMetadata.TransactionSummary,
+		MonthlySummary:     transactionMetadata.MonthlySummary,
 		AverageCredit:      transactionMetadata.AverageCredit,
 		AverageDebit:       transactionMetadata.AverageDebit,
 	}

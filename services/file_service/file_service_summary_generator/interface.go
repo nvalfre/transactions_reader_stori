@@ -6,5 +6,5 @@ import (
 )
 
 type FileSummaryGeneratorUseCaseI interface {
-	GenerateSummary(c *gin.Context, fileContent []byte) (*domain.SummaryVO, error)
+	Execute(c *gin.Context, fileContent []byte) (*domain.SummaryVO, error)
 }

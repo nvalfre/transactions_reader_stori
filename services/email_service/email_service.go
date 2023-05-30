@@ -1,30 +1,35 @@
 package email_service
 
 import (
+	"crypto/tls"
 	"fmt"
 	"gopkg.in/gomail.v2"
 	"log"
 	"transactions_reader_stori/domain"
 )
 
-const subject = "SummaryVO Report"
-const emailBody = `Total balance: %.2f
-				Number of transactions in July: %f
-				Number of transactions in August: %f
-				Average credit amount: %.2f
-				Average debit amount: %.2f`
+const subjectHealine = "SummaryVO Report"
+
+const (
+	from         = "From"
+	to           = "To"
+	subject      = "Subject"
+	senderFormat = "%s <%s>"
+	contentType  = "text/plain"
+)
 
 // SendSummaryEmail sends the summary information as an email
 func (s *EmailService) SendSummaryEmail(summary *domain.SummaryVO, recipient string) error {
-	body := fmt.Sprintf(emailBody, summary.TotalBalance, summary.TransactionSummary[0].Amount, summary.TransactionSummary[1].Amount, summary.AverageCredit, summary.AverageDebit)
+	body := s.buildEmailBodyContent(summary)
 
 	mailer := gomail.NewMessage()
-	mailer.SetHeader("From", fmt.Sprintf("%s <%s>", s.senderName, s.senderEmail))
-	mailer.SetHeader("To", recipient)
-	mailer.SetHeader("Subject", subject)
-	mailer.SetBody("text/plain", body)
+	mailer.SetHeader(from, fmt.Sprintf(senderFormat, s.senderName, s.senderEmail))
+	mailer.SetHeader(to, recipient)
+	mailer.SetHeader(subject, subjectHealine)
+	mailer.SetBody(contentType, body)
 
 	dialer := gomail.NewDialer(s.smtpHost, s.smtpPort, s.smtpUsername, s.smtpPassword)
+	dialer.TLSConfig = &tls.Config{InsecureSkipVerify: true}
 
 	if err := dialer.DialAndSend(mailer); err != nil {
 		log.Println("Failed to send email:", err)
