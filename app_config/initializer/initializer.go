@@ -1,38 +1,32 @@
 package initializer
 
 import (
-	"database/sql"
-	"github.com/gin-gonic/gin"
 	"transactions_reader_stori/app_config/app"
-	"transactions_reader_stori/controllers/file_controller"
+	"transactions_reader_stori/app_config/initializer/controllers"
+	"transactions_reader_stori/app_config/initializer/repositories"
+	"transactions_reader_stori/app_config/initializer/routes"
+	"transactions_reader_stori/app_config/initializer/services"
 	"transactions_reader_stori/controllers/init_controllers"
-	"transactions_reader_stori/repository/factories/account_repository_factory"
-	"transactions_reader_stori/repository/factories/transaction_repository_factory"
-	"transactions_reader_stori/repository/init_repositories"
-	"transactions_reader_stori/services/account_service"
-	"transactions_reader_stori/services/email_service"
-	"transactions_reader_stori/services/file_service"
 	"transactions_reader_stori/services/init_services"
-	"transactions_reader_stori/services/transaction_service"
 )
 
 type appComponentsInitializerI interface {
-	Init(db *sql.DB)
-	initDatabaseRepoCommands(db *sql.DB) *init_repositories.DatabaseRepoCommands
-	initControllerFactories(services *init_services.Services) file_controller.FileControllerFactoryI
-	initServicesFactories() (*account_service.AccountServiceFactory, *transaction_service.TransactionServiceFactory, *file_service.FileServiceFactory, *email_service.EmailServiceFactory)
-	initRoutes(controllers *init_controllers.Controllers) *gin.Engine
+	Init()
 }
 
 type AppComponentsInitializer struct {
+	AppControllerFactoriesComponentsInitializer  controllers.AppControllerFactoriesComponentsInitializerI
+	AppRepositoriesCommandsComponentsInitializer repositories.AppRepositoriesCommandsComponentsInitializerI
+	AppServicesComponentsInitializer             services.AppServicesComponentsInitializerI
+	AppRoutesInitializer                         routes.RoutesInitializerI
 }
 
-func (initializer AppComponentsInitializer) Init(db *sql.DB) {
-	databaseRepoCommands := initializer.initDatabaseRepoCommands(db)
+func (initializer AppComponentsInitializer) Init() {
+	databaseRepoCommands := initializer.AppRepositoriesCommandsComponentsInitializer.InitDatabaseRepoCommands()
 
-	accountServiceFactory, transactionServiceFactory, fileServiceFactory, emailServiceFactory := initializer.initServicesFactories()
+	accountServiceFactory, transactionServiceFactory, fileServiceFactory, emailServiceFactory := initializer.AppServicesComponentsInitializer.InitServicesFactories()
 
-	services := init_services.InitWith(
+	appServices := init_services.InitWith(
 		accountServiceFactory,
 		transactionServiceFactory,
 		fileServiceFactory,
@@ -41,44 +35,9 @@ func (initializer AppComponentsInitializer) Init(db *sql.DB) {
 		databaseRepoCommands.AccountRepository,
 	)
 
-	fileControllerFactory := initializer.initControllerFactories(services)
+	fileControllerFactory := initializer.AppControllerFactoriesComponentsInitializer.InitControllerFactories(appServices)
 
-	controllers := init_controllers.InitWith(fileControllerFactory)
-	routes := initializer.initRoutes(controllers)
-	app.NewApp(routes).Run()
-}
-
-func (initializer AppComponentsInitializer) initDatabaseRepoCommands(db *sql.DB) *init_repositories.DatabaseRepoCommands {
-	repo := init_repositories.NewDatabaseRepo(db)
-
-	transactionDatabaseRepo := transaction_repository_factory.NewTransactionDatabaseRepo(repo)
-	accountDatabaseRepo := account_repository_factory.NewAccountDatabaseRepo(repo)
-
-	commands := &init_repositories.DatabaseRepoCommands{
-		TransactionRepository: transactionDatabaseRepo,
-		AccountRepository:     accountDatabaseRepo,
-	}
-
-	return commands
-}
-
-func (initializer AppComponentsInitializer) initControllerFactories(services *init_services.Services) file_controller.FileControllerFactoryI {
-	fileControllerFactory := &file_controller.FileControllerFactory{FileService: services.FileService}
-	return fileControllerFactory
-}
-
-func (initializer AppComponentsInitializer) initServicesFactories() (*account_service.AccountServiceFactory, *transaction_service.TransactionServiceFactory, *file_service.FileServiceFactory, *email_service.EmailServiceFactory) {
-	accountServiceFactory := &account_service.AccountServiceFactory{}
-	transactionServiceFactory := &transaction_service.TransactionServiceFactory{}
-	fileServiceFactory := &file_service.FileServiceFactory{}
-	emailServiceFactory := &email_service.EmailServiceFactory{}
-	return accountServiceFactory, transactionServiceFactory, fileServiceFactory, emailServiceFactory
-}
-
-func (initializer AppComponentsInitializer) initRoutes(controllers *init_controllers.Controllers) *gin.Engine {
-	router := gin.Default()
-
-	router.POST("/file/process/transactions", controllers.FileController.ProcessFile)
-
-	return router
+	appControllers := init_controllers.InitWith(fileControllerFactory)
+	appRoutes := initializer.AppRoutesInitializer.InitRoutes(appControllers)
+	app.NewApp(appRoutes).Run()
 }

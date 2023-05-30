@@ -28,6 +28,7 @@ func (mockTransactionRepository MockTransactionRepository) GetTransactionSummary
 	return []domain.TransactionSummary{{
 		Month:  time.Now(),
 		Amount: 1,
+		ID:     1,
 	}}, nil
 }
 func (mockTransactionRepository MockTransactionRepository) GetAverageCredit() (float64, error) {

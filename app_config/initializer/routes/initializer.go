@@ -10,13 +10,12 @@ type RoutesInitializerI interface {
 }
 
 type RoutesInitializer struct {
-	engine *gin.Engine
 }
 
-func (routesInitializer RoutesInitializer) InitRoutes(controllers *init_controllers.Controllers) *gin.Engine {
+func (initializer RoutesInitializer) InitRoutes(controllers *init_controllers.Controllers) *gin.Engine {
 	router := gin.Default()
 
-	routesInitializer.init(controllers, router)
+	router.POST("/file/process/transactions", controllers.FileController.ProcessFile)
 
 	return router
 }
