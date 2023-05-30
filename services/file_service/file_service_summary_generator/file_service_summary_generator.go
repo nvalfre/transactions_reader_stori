@@ -56,12 +56,12 @@ func (fs *FileSummaryGeneratorUseCase) GenerateSummary(c *gin.Context, fileConte
 	var summary *domain.SummaryVO
 	select {
 	case summary = <-summaryCh:
-		//err := fs.emailService.SendSummaryEmail(summary, "testmail_stori_nv@gmail.com")
-		//if err != nil {
-		//	log.Println("Failed to send summary email:", err)
-		//	errorCh <- err
-		//	return nil, err
-		//}
+		err := fs.emailService.SendSummaryEmail(summary, "testmail_stori_nv@gmail.com")
+		if err != nil {
+			log.Println("Failed to send summary email:", err)
+			errorCh <- err
+			return nil, err
+		}
 	case err := <-errorCh:
 		log.Println("Error occurred on summary send:", err)
 		return nil, err
