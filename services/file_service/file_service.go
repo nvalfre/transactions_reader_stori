@@ -16,7 +16,7 @@ func (fs *FileService) ProcessFile(c *gin.Context) (*domain.Response, error) {
 		}, err
 	}
 
-	summary, err := fs.fileSummaryGeneratorUseCase.GenerateSummary(c, fileContent)
+	summary, err := fs.fileSummaryGeneratorUseCase.Execute(c, fileContent)
 	if err != nil {
 		return &domain.Response{
 			Status: http.StatusBadRequest,

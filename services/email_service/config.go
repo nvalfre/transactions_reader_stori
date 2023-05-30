@@ -2,7 +2,7 @@ package email_service
 
 // Default SMTP configuration
 const (
-	DefaultSMTPHost     = "smtp.gmail.com"
+	DefaultSMTPHost     = "smtp-relay.sendinblue.com"
 	DefaultSMTPPort     = 587
 	DefaultSMTPUsername = "testmailnv23@gmail.com"
 	DefaultSMTPPassword = "smtppassword" //TODO Change it

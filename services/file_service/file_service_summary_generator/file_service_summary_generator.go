@@ -17,7 +17,7 @@ type FileSummaryGeneratorUseCase struct {
 	emailService       email_service.EmailServiceI
 }
 
-func (fs *FileSummaryGeneratorUseCase) GenerateSummary(c *gin.Context, fileContent []byte) (*domain.SummaryVO, error) {
+func (fs *FileSummaryGeneratorUseCase) Execute(c *gin.Context, fileContent []byte) (*domain.SummaryVO, error) {
 	summaryCh := make(chan *domain.SummaryVO)
 	errorCh := make(chan error)
 	fileProcessingDoneCh := make(chan bool)
