@@ -21,7 +21,7 @@ func main() {
 		AppRoutesInitializer:                         routes.RoutesInitializer{},
 	}
 
-	appComponentsInitializer.Init()
+	appComponentsInitializer.Init().Run()
 }
 
 func getDatabase() *sql.DB {

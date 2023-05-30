@@ -28,16 +28,16 @@ The Transaction Summary Microservice is a Go-based application that processes a 
    ```
 
 3. Set up the necessary environment variables:
-
+   - email_service/config.go
     - SMTP Configuration:
-        - `SMTP_HOST`: Hostname of the SMTP server
-        - `SMTP_PORT`: Port number of the SMTP server
-        - `SMTP_USERNAME`: Username for authenticating with the SMTP server
-        - `SMTP_PASSWORD`: Password for authenticating with the SMTP server
+        - `DefaultSMTPHost`: Hostname of the SMTP server
+        - `DefaultSMTPPort`: Port number of the SMTP server
+        - `DefaultSMTPUsername`: Username for authenticating with the SMTP server
+        - `DefaultSMTPPassword`: Password for authenticating with the SMTP server
 
     - Sender Details:
-        - `SENDER_NAME`: Name of the email sender
-        - `SENDER_EMAIL`: Email address of the email sender
+        - `DefaultSenderName`: Name of the email sender
+        - `DefaultSenderEmail`: Email address of the email sender
 
 4. Build the microservice:
 
@@ -72,16 +72,35 @@ The microservice can be deployed using various methods such as containerization 
 1. Build the Docker image:
 
    ```bash
+   docker build -t <image> .
+   ie: 
    docker build -t transactions_summary .
    ```
 
 2. Run the Docker container:
-
    ```bash
-   docker run -p 8080:8080 -e SMTP_HOST=<host> -e SMTP_PORT=<port> -e SMTP_USERNAME=<username> -e SMTP_PASSWORD=<password> -e SENDER_NAME=<sender-name> -e SENDER_EMAIL=<sender-email> transactions_summary
+   build:
+    - docker build -t <image>:<version>
+    - docker tag <image>:latest <user>/<image>:latest
+    - docker push <user>/<image>:<version>
+   
+   on aws ec2 instance
+   install docker:
+    - sudo yum install docker
+    - sudo usermod -a -G docker ec2-user
+    - id ec2-user
+    - # Reload a Linux user's group assignments to docker w/o logout
+    - newgrp docker
+    - sudo systemctl enable docker.service
+    - sudo systemctl start docker.service
+    - verify
+      - sudo systemctl status docker.service
+      - docker <version>
+   docker run -e GIN_MODE=release -p 8080:8080 --name <image> <user>/<image>
+    - logs: docker logs <image>
    ```
+3. Examples:
 
-   Replace `<host>`, `<port>`, `<username>`, `<password>`, `<sender-name>`, and `<sender-email>` with the actual values.
 
 ## Contributing
 
