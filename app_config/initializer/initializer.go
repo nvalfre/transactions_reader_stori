@@ -11,7 +11,7 @@ import (
 )
 
 type appComponentsInitializerI interface {
-	Init()
+	Init() app.App
 }
 
 type AppComponentsInitializer struct {
@@ -21,7 +21,7 @@ type AppComponentsInitializer struct {
 	AppRoutesInitializer                         routes.RoutesInitializerI
 }
 
-func (initializer AppComponentsInitializer) Init() {
+func (initializer AppComponentsInitializer) Init() app.App {
 	databaseRepoCommands := initializer.AppRepositoriesCommandsComponentsInitializer.InitDatabaseRepoCommands()
 
 	accountServiceFactory, transactionServiceFactory, fileServiceFactory, emailServiceFactory := initializer.AppServicesComponentsInitializer.InitServicesFactories()
@@ -39,5 +39,5 @@ func (initializer AppComponentsInitializer) Init() {
 
 	appControllers := init_controllers.InitWith(fileControllerFactory)
 	appRoutes := initializer.AppRoutesInitializer.InitRoutes(appControllers)
-	app.NewApp(appRoutes).Run()
+	return app.NewApp(appRoutes)
 }

@@ -2,13 +2,21 @@ package file_service
 
 import (
 	"github.com/gin-gonic/gin"
+	"log"
 	"net/http"
 	"transactions_reader_stori/domain"
 )
 
 // ProcessFile processes the uploaded file
 func (fs *FileService) ProcessFile(c *gin.Context) (*domain.Response, error) {
-	fileContent, err := fs.fileContentReaderUseCase.GetFileContent()
+	file, err := c.FormFile("file")
+
+	if err != nil {
+		log.Println("Error occurred:", err)
+		return nil, err
+	}
+
+	fileContent, err := fs.fileContentReaderUseCase.GetFileContentFromRequest(file)
 	if err != nil {
 		return &domain.Response{
 			Status: http.StatusBadRequest,
