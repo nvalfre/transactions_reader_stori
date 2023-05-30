@@ -100,8 +100,12 @@ The microservice can be deployed using various methods such as containerization 
     - logs: docker logs <image>
    ```
 3. Examples:
-
-
+   ```
+   curl --location --request POST 'http://localhost:8080/file/process/transactions?account_id=1&name=accname&email=testmailnv23@gmail.com' \
+   --header 'Content-Type: application/json' \
+   --form 'file=@"/C:/Users/KTUFi5-Desk/Documents/Nico/dev/transactions_reader_stori/balance.csv"'
+   ```
+   
 ## Contributing
 
 Contributions are welcome! If you find any issues or have suggestions for improvements, please open an issue or submit a pull request.
