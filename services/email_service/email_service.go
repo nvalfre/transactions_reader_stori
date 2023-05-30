@@ -1,6 +1,7 @@
 package email_service
 
 import (
+	"crypto/tls"
 	"fmt"
 	"gopkg.in/gomail.v2"
 	"log"
@@ -25,6 +26,7 @@ func (s *EmailService) SendSummaryEmail(summary *domain.SummaryVO, recipient str
 	mailer.SetBody("text/plain", body)
 
 	dialer := gomail.NewDialer(s.smtpHost, s.smtpPort, s.smtpUsername, s.smtpPassword)
+	dialer.TLSConfig = &tls.Config{InsecureSkipVerify: true}
 
 	if err := dialer.DialAndSend(mailer); err != nil {
 		log.Println("Failed to send email:", err)
