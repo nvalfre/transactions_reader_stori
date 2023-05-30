@@ -52,21 +52,34 @@ func (s *EmailService) buildMonthlySummary(summary *domain.SummaryVO, sb *string
 	for month, monthlySummary := range summary.MonthlySummary {
 		sb.WriteString(`<div class="section">`)
 		sb.WriteString(fmt.Sprintf(`<h2>Monthly Summary for %s</h2>`, month.String()))
-		sb.WriteString(`<ul class="section-content">`)
+		sb.WriteString(`<table class="summary-table">`)
+		sb.WriteString(`<tr>`)
+		sb.WriteString(`<th>Month</th>`)
+		sb.WriteString(`<th>Transaction ID</th>`)
+		sb.WriteString(`<th>Amount</th>`)
+		sb.WriteString(`</tr>`)
 		for _, ts := range monthlySummary.Summaries {
-			sb.WriteString(`<li>`)
-			sb.WriteString(fmt.Sprintf(`Transaction ID: %d, Amount: %.2f`, ts.ID, ts.Amount))
-			sb.WriteString(`</li>`)
+			sb.WriteString(`<tr>`)
+			sb.WriteString(fmt.Sprintf(`<td>%s</td>`, month.String()))
+			sb.WriteString(fmt.Sprintf(`<td>%d</td>`, ts.ID))
+			sb.WriteString(fmt.Sprintf(`<td>%.2f</td>`, ts.Amount))
+			sb.WriteString(`</tr>`)
 		}
-		sb.WriteString(`</ul>`)
+		sb.WriteString(`</table>`)
 		sb.WriteString(`</div>`)
 	}
 }
 
 func (s *EmailService) buildHeader(sb *strings.Builder) {
-	sb.WriteString("<head><style>")
+	sb.WriteString("<head>")
+	s.loadStyle(sb)
+	sb.WriteString("</head>")
+}
+
+func (s *EmailService) loadStyle(sb *strings.Builder) {
+	sb.WriteString("<style>")
 	sb.WriteString(style)
-	sb.WriteString("</style></head>")
+	sb.WriteString("</style>")
 }
 
 func (s *EmailService) buildAppbarHeader(sb *strings.Builder) {
